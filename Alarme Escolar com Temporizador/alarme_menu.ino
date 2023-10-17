@@ -1,142 +1,149 @@
-#define confirma 2
-#define direita  5
-#define cima     8
+#include <EEPROM.h>
 
-int segundo_um      = 0; // 0
-int segundo_dois    = 0; // 1
-int minuto_um       = 0; // 2
-int minuto_dois     = 0; // 3
-int hora_um         = 0; // 4
-int hora_dois       = 0; // 5
+#define mudar     2
+#define confirmar 4
 
-int x = 0;
-int y = 0;
+int selecao = 0;
+int local = 0;
+
+int numRows = 64;
+int numCols = 2;
+int horarios[64][2] = {};
+int pointer = 0;
+
+/*
+int concatenarInt(int num1, int num2){
+  String strNum1 = String(num1);
+  String strNum2 = String(num2);
+
+  String concatenated = strNum1 + strNum2;
+
+  int result = concatenated.toInt();
+
+  return result;
+}
+*/
+
+void saveArrayToEEPROM() {
+  int addr = 0;
+  for (int row = 0; row < pointer; row++) {
+    for (int col = 0; col < numCols; col++) {
+      EEPROM.update(addr, horarios[row][col]);
+      addr++;
+    }
+  }
+}
+
+void readArrayFromEEPROM() {
+  int addr = 0;
+  for (int row = 0; row < pointer; row++) {
+    for (int col = 0; col < numCols; col++) {
+      horarios[row][col] = EEPROM.read(addr);
+      addr++;
+    }
+  }
+}
+
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(confirma, INPUT_PULLUP);
-  pinMode(direita , INPUT_PULLUP);
-  pinMode(cima    , INPUT_PULLUP);
-
   Serial.begin(9600);
+  pinMode(mudar, INPUT_PULLUP);
+  pinMode(confirmar, INPUT_PULLUP);
+  
+  pointer = EEPROM.read(98);
+  if(pointer > 0){
+    readArrayFromEEPROM();
+  }
+  
+
 }
 
 void loop() {
+  if(local == 0){
 
-  if(x >= 6){
-    x = 0;
+     if(digitalRead(mudar) == LOW){
+        if(selecao < 1){
+          selecao++;
+        }else{
+          selecao = 0;
+        }
+    }
+
+     if(digitalRead(confirmar) == LOW){
+        local = selecao+1;
+        selecao = 0;
+     }
+
+  if(local == 1){
+    int hora = 0; // 1
+    int minuto = 0; // 0
+
+    Serial.println();
+
+    while(local == 1){
+      delay(200);
+      Serial.print(selecao);
+      Serial.println();
+      Serial.print(hora);
+      Serial.print(":");
+      Serial.print(minuto); 
+      Serial.println();
+      Serial.println();
+      if(digitalRead(mudar) == LOW){
+        if(selecao < 3){
+          selecao++;
+        }else{
+          selecao = 0;
+        }
+      }
+
+      switch(selecao){
+        case 0: // mudar minutos
+          if(digitalRead(confirmar) == LOW){
+            
+            if(minuto < 59){
+              minuto++;
+            }else{
+              minuto = 0;
+            }
+          }
+          break;
+        case 1: // Mudar horas
+          if(digitalRead(confirmar) == LOW){
+            
+            if(hora < 23){
+              hora++;
+            }else{
+              hora = 0;
+            }
+          }
+          break;
+        case 2: //save function write later
+          if(digitalRead(confirmar) == LOW){
+            horarios[pointer][0] = hora;
+            horarios[pointer][1] = minuto;
+            pointer++;
+
+            EEPROM.write(98, pointer);
+
+            saveArrayToEEPROM();
+          }
+          break;
+        case 3: // quit
+          if(digitalRead(confirmar) == LOW){
+            local = 0;
+            selecao = 0;
+          }
+          break;
+        }
+      }
+    }
   }
 
-  if(digitalRead(direita) == LOW){
-    x++;
-    y = 0;
-    delay(500);
-  }
-
-  switch(x){
-    case 0:
-      if(y > 9){
-        y = 0;
-      }
-
-      if(digitalRead(cima) == LOW){
-        y++;
-        delay(500);
-      }
-
-      if(digitalRead(confirma) == LOW){
-        segundo_um = y;
-      }
-
-      break;
-    case 1:
-      if(y > 6){
-        y = 0;
-      }
-
-      if(digitalRead(cima) == LOW){
-        y++;
-        delay(500);
-      }
-
-      if(digitalRead(confirma) == LOW){
-        segundo_dois = y;
-      }
-
-      break;
-    case 2:
-      if(y > 9){
-        y = 0;
-      }
-
-      if(digitalRead(cima) == LOW){
-        y++;
-        delay(500);
-      }
-
-      if(digitalRead(confirma) == LOW){
-        minuto_um = y;
-      }
-
-      break;
-    case 3:
-      if(y > 6){
-          y = 0;
-        }
-
-        if(digitalRead(cima) == LOW){
-        y++;
-        delay(500);
-      }
-
-      if(digitalRead(confirma) == LOW){
-        minuto_dois = y;
-      }
-
-      break;
-    
-    case 4:
-      if(y > 9){
-          y = 0;
-        }
-
-        if(digitalRead(cima) == LOW){
-        y++;
-        delay(500);
-      }
-
-      if(digitalRead(confirma) == LOW){
-        hora_um = y;
-      }
-
-      break;
-    
-    case 5:
-
-      if(y > 6){
-          y = 0;
-        }
-
-        if(digitalRead(cima) == LOW){
-        y++;
-        delay(500);
-      }
-
-      if(digitalRead(confirma) == LOW){
-        hora_dois = y;
-      }
-
-      break;
-  }
-  Serial.print(x);
+  Serial.print(selecao);
   Serial.print(" ");
-  Serial.print(y);
-  Serial.print(" ");
-  Serial.print(hora_dois);
-  Serial.print(hora_um);
-  Serial.print(":");
-  Serial.print(minuto_dois);
-  Serial.print(minuto_um);
+  Serial.print(local);
   Serial.println();
 
+  delay(200);
 }
