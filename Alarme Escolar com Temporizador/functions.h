@@ -17,13 +17,13 @@
 
 
 
-void SaveArrayToEEPROM(int pointer, int horarios[][2]);
-void ReadArrayFromEEPROM(int pointer);
+void SaveArrayToEEPROM();
+void ReadArrayFromEEPROM();
 byte ConverteParaBCD(byte val);
 byte ConverteparaDecimal(byte val);
 void SelecionaDataeHora();
 void Mostrarelogio();
-// void Checarhora(int pointer, int horarios[][2]);
+void Checarhora();
 uint64_t millis64();
 void StartLCD();
 void LoadingAnim();

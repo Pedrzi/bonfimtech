@@ -3,8 +3,9 @@
 extern byte zero;
 extern LiquidCrystal lcd;
 extern int pointer;
+extern int horarios[][2]; // Matriz de horários
 
-void SaveArrayToEEPROM(int pointer, int horarios[][2]) 
+void SaveArrayToEEPROM() 
 {
   int addr = 0;
   for (int row = 0; row < pointer; row++) {
@@ -15,7 +16,7 @@ void SaveArrayToEEPROM(int pointer, int horarios[][2])
   }
 }
 
-void ReadArrayFromEEPROM(int pointer) 
+void ReadArrayFromEEPROM() 
 {
   int horarios[][2] = {};
   int addr = 0;
@@ -130,7 +131,7 @@ void Mostrarelogio()
     */
 }
 
-void Checarhora(int pointer, int horarios[][2])
+void Checarhora()
 {
     Wire.beginTransmission(DS1307_ADDRESS);
     Wire.write(zero);
@@ -144,10 +145,13 @@ void Checarhora(int pointer, int horarios[][2])
     int mes = ConverteparaDecimal(Wire.read());
     int ano = ConverteparaDecimal(Wire.read());
 
-    for(int i = 0; i < pointer; i++)
+    for(int i = 0; i < 9; i++)
     {
-        if(segundos == horarios[i][0]){
-            Serial.println("alarme!!!!!!!!!!");
+        Serial.println(horarios[i][0]);
+        if(horarios[i][0] == segundos)
+        {
+            lcd.setCursor(11,0);
+            lcd.print("O");
         }
     }
     
@@ -178,11 +182,25 @@ void StartEEPROM()
 
     if(pointer > 0)
     {
-        ReadArrayFromEEPROM(pointer);
+        ReadArrayFromEEPROM();
     }
 
     Serial.print("Pointer index is at: ");
     Serial.println(pointer);
+}
+
+void StartLCD()
+{
+    analogWrite(3, Contrast);
+
+    lcd.begin(16, 2);
+
+    lcd.setCursor(0,0);
+    lcd.print("Ola!");
+    delay(1000);
+
+    // LoadingAnim();
+    lcd.clear();
 }
 
 void LoadingAnim()
@@ -211,16 +229,4 @@ void LoadingAnim()
     }
 }
 
-void StartLCD()
-{
-    analogWrite(3, Contrast);
 
-    lcd.begin(16, 2);
-
-    lcd.setCursor(0,0);
-    lcd.print("Hello!");
-    delay(1000);
-
-    // loadingAnim();
-    lcd.clear();
-}
