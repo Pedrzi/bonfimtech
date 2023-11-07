@@ -29,5 +29,6 @@ void StartLCD();
 void LoadingAnim();
 void StartEEPROM();
 void StartButtons();
+void selecChanger();
 
 #endif

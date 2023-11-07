@@ -4,6 +4,8 @@ extern byte zero;
 extern LiquidCrystal lcd;
 extern int pointer;
 extern int horarios[][2]; // Matriz de horários
+extern char *local;
+extern int selection;
 
 void SaveArrayToEEPROM() 
 {
@@ -199,7 +201,7 @@ void StartLCD()
     lcd.print("Ola!");
     delay(1000);
 
-    // LoadingAnim();
+    //LoadingAnim();
     lcd.clear();
 }
 
@@ -229,4 +231,33 @@ void LoadingAnim()
     }
 }
 
+void selecChanger()
+{   
+    if(local == "menu")
+    {
+         selection = 0;
+    }
+    else if (local == "turnos")
+    {
+        if (selection > 3 || selection == 0)
+        {
+            selection = 1;
+        }
+    }
+    else if (local == "manha")
+    {
+        if (selection > 12 || selection < 4)
+            selection = 4;
+            
+    }
+    else if (local == "tarde")
+    {
+        if (selection > 18 || selection < 12)
+            selection = 12;
+    }
+    else
+    {
+        selection = 0;
+    }
+}
 
