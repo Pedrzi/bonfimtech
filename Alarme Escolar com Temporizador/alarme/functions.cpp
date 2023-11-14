@@ -6,6 +6,7 @@ extern int pointer;
 extern int horarios[][2]; // Matriz de horários
 extern char *local;
 extern int selection;
+extern char layers[4][16];
 
 void SaveArrayToEEPROM() 
 {
@@ -44,12 +45,12 @@ byte ConverteparaDecimal(byte val)
 
 void SelecionaDataeHora()
 {
-    byte segundos = 0; // Valores de 0 a 59
-    byte minutos = 12; // Valores de 0 a 59
-    byte horas = 16; // Valores de 0 a 23
-    byte diadasemana = 1; // Valores de 0 a 6 (0=Domingo, 1 = Segunda...)
-    byte diadomes = 30; // Valores de 1 a 31
-    byte mes = 10; // Valores de 1 a 12
+    byte segundos = 25; // Valores de 0 a 59
+    byte minutos = 57; // Valores de 0 a 59
+    byte horas = 0; // Valores de 0 a 23
+    byte diadasemana = 2; // Valores de 0 a 6 (0=Domingo, 1 = Segunda...)
+    byte diadomes = 14; // Valores de 1 a 31
+    byte mes = 11; // Valores de 1 a 12
     byte ano = 23; // Valores de 0 a 99
     Wire.beginTransmission(DS1307_ADDRESS);
     // Stop no CI para que o mesmo possa receber os dados
@@ -147,13 +148,15 @@ void Checarhora()
     int mes = ConverteparaDecimal(Wire.read());
     int ano = ConverteparaDecimal(Wire.read());
 
-    for(int i = 0; i < 9; i++)
+    for(int i = 0; i < 15; i++)
     {
         Serial.println(horarios[i][0]);
-        if(horarios[i][0] == segundos)
+        if(horarios[i][0] == horas)
         {
-            lcd.setCursor(11,0);
-            lcd.print("O");
+            if(horarios[i][1] == minutos)
+            {
+                Serial.println("ALARMEEEEE!!!!!!!!!!");
+            }
         }
     }
     
@@ -199,7 +202,7 @@ void StartLCD()
 
     lcd.setCursor(0,0);
     lcd.print("Ola!");
-    delay(1000);
+    //delay(1000);
 
     //LoadingAnim();
     lcd.clear();
@@ -233,27 +236,26 @@ void LoadingAnim()
 
 void selecChanger()
 {   
-    if(local == "menu")
+    if(local == layers[0])
     {
          selection = 0;
     }
-    else if (local == "turnos")
+    else if (local == layers[1])
     {
         if (selection > 3 || selection == 0)
         {
             selection = 1;
         }
     }
-    else if (local == "manha")
+    else if (local == layers[2])
     {
         if (selection > 12 || selection < 4)
-            selection = 4;
-            
+            selection = 4;     
     }
-    else if (local == "tarde")
+    else if (local == layers[3])
     {
-        if (selection > 18 || selection < 12)
-            selection = 12;
+        if (selection > 19 || selection < 13)
+            selection = 13;
     }
     else
     {

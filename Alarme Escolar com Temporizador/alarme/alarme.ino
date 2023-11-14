@@ -11,7 +11,7 @@ LiquidCrystal lcd(9,8,7,6,5,4); // pins do LCD
 char daysOfTheWeek[7][12] = {"Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"};
 
 int selection         =  0; // seleção atual do Render
-char *local           = "menu"; // layer atual do Render
+char *local           = layers[0]; // layer atual do Render
 int pointer           =  0; // índice atual da matriz de horários
 int layerlimit        =  0;
 int horarios[][2]     = {
@@ -43,7 +43,7 @@ void setup()
     Serial.println("Buttons started");
 
     //SelecionaDataeHora();
-
+    pinMode(A1, OUTPUT);
     delay(100);
 }
 
@@ -59,50 +59,44 @@ void loop()
         lcd.clear();
     }
  
-    if(local == "menu")
+    if(local == layers[0])
     {
         
     }
-    else if (local == "turnos")
+    else if (local == layers[1])
     {
         
     }
-    else if (local == "manha")
+    else if (local == layers[2]) // manha
     {
         
     }
-    else if (local == "tarde")
+    else if (local == layers[3]) // tarde
     {
         
     }
     else
     {
-        
-    }
-  // Check the value of 'selection' and change 'local' accordingly
-    switch (selection) {
-        case 0: // Handle selection case 0
-            if (confirma) {
-                local = "turnos"; // Set local to "Render"
-            }
-        break;
-        case 1: // Handle selection case 1
-            if (confirma) {
-                local = "manha"; // Set local to "turnos"
-            }
-        break;
-        case 2: // Handle selection case 2
-            if (confirma) {
-                local = "tarde"; // Set local to "manha"
-            }
-        break;
-        default:
-            if (confirma) {
-                local = "menu"; // Set local to "tarde"
-            }
-        break;
+        local = layers[0];
     }
 
+
+    if(selection < 3)
+    {
+        if (confirma) 
+        {
+            local = layers[selection+1]; 
+        }
+    }
+    else
+    {
+        if (confirma) 
+        {
+            local = layers[0]; 
+        }
+    }
+
+    // button check
     if(muda && currentTime-previousMillis > 200)
     {
         previousMillis = currentTime;
@@ -114,9 +108,8 @@ void loop()
     // Render the 'local'
     selecChanger();
     Render();
-    
-    Serial.println(selection);
-    
+    Checarhora();
+
 }
 void Render()
 {
@@ -132,7 +125,7 @@ void Render()
     int mes = ConverteparaDecimal(Wire.read());
     int ano = ConverteparaDecimal(Wire.read());
 
-    if(local == "menu") // layer 0 
+    if(local == layers[0]) // layer 0  menu
     {
         Mostrarelogio();
 
@@ -140,43 +133,33 @@ void Render()
         lcd.print("listar");
     }
 
-    else if(local == "turnos") // layer 1
+    else if(local == layers[1]) // layer 1 turnos
     {
         lcd.setCursor(5, 0);
         lcd.print("Turno?");
 
+        lcd.setCursor(5,1);
         switch (selection) 
         {
-            case 1:
-                lcd.setCursor(5,1);
+            case 1:               
                 lcd.print("Manha");
                 break;
             case 2:
-            lcd.setCursor(5,1);
                 lcd.print("Tarde");
                 break;
-            case 3:
-            lcd.setCursor(5,1);
+            case 3:                
                 lcd.print("Voltar");
         }
         
     }
 
-    else if(local == "manha") // layer 2 turno manhã
+    else if(local == layers[2]) // layer 2 turno manhã
     {
         lcd.setCursor(1,0);
         lcd.print("Horarios Manha");
 
-        switch(selection)
+        if(selection < 12)
         {
-        case 12:
-
-            lcd.setCursor(5,1);
-            lcd.print("Voltar");
-
-            break;
-        default:
-
             lcd.setCursor(0,1);
             lcd.print(selection-3);
             lcd.setCursor(6,1);
@@ -190,45 +173,44 @@ void Render()
             }
             lcd.print(horarios[selection-4][1]);
             lcd.print("      ");
-            
-            break;
+        }
+        else
+        {
+            lcd.setCursor(5,1);
+            lcd.print("Voltar");
         }
 
     }
 
-    else if(local == "tarde") // layer 3 turno tarde
+    else if(local == layers[3]) // layer 3 turno tarde
     {
 
         lcd.setCursor(1,0);
         lcd.print("Horarios Tarde");
 
-        switch(selection)
+        if(selection < 19)
         {
-        case 18:
-
+            lcd.setCursor(0,1);
+            lcd.print(selection-12);
+            lcd.setCursor(6,1);
+            if(horarios[selection-5][0] < 10){
+                lcd.print("0");
+            }
+            lcd.print(horarios[selection-5][0]);
+            lcd.print(":");
+            if(horarios[selection-5][1] < 10){
+                lcd.print("0");
+            }
+            lcd.print(horarios[selection-5][1]);
+            lcd.print("      ");
+        }
+        else
+        {
             lcd.setCursor(5,1);
             lcd.print("Voltar");
-
-            break;
-        default:
-            lcd.setCursor(0,1);
-            lcd.print(selection-11);
-            lcd.setCursor(6,1);
-            if(horarios[selection-4][0] < 10){
-                lcd.print("0");
-            }
-            lcd.print(horarios[selection-4][0]);
-            lcd.print(":");
-            if(horarios[selection-4][1] < 10){
-                lcd.print("0");
-            }
-            lcd.print(horarios[selection-4][1]);
-            lcd.print("      ");
-            
-            break;
         }
-    }
-    
+        
+    } 
     
 }
 
