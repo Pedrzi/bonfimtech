@@ -4,7 +4,7 @@
 #include <EEPROM.h>
 #include "Wire.h"
 
-char   layers[][16] = {"menu", "turnos", "manha", "tarde"};
+char   layers[][16] = {"menu", "turnos", "manha", "tarde", "edição"};
 byte zero = 0x00;
 LiquidCrystal lcd(9,8,7,6,5,4); // pins do LCD
 
@@ -24,6 +24,10 @@ int horarios[][2]     = {
 {15, 20}, {16, 0},
 {11, 30}, {12, 10}
 };
+int horarioSize = 16;
+int hora = 0;
+int minuto = 0;
+int index = 0;
 
 long previousMillis = 0;
 const long second = 1000;
@@ -43,7 +47,9 @@ void setup()
     Serial.println("Buttons started");
 
     //SelecionaDataeHora();
-    pinMode(A1, OUTPUT);
+    //SaveArrayToEEPROM();
+    ReadArrayFromEEPROM();
+    
     delay(100);
 }
 
@@ -69,11 +75,71 @@ void loop()
     }
     else if (local == layers[2]) // manha
     {
-        
+        if(selection < 12)
+        {
+            if(confirma)
+            {
+                // enviar horário para o editor de horári
+                hora = horarios[selection-4][0];
+                minuto = horarios[selection-4][1];
+                index = selection-4;
+                local = layers[4];
+            }
+        }
     }
     else if (local == layers[3]) // tarde
     {
+        if(selection < 19)
+        { // 16 24 21
+            if(confirma)
+            {
+                // enviar horário para o editor de horário
+                hora = horarios[selection-5][0];
+                minuto = horarios[selection-5][1];
+                index = selection-5;
+                local = layers[4];
+            }
+        }
+    }
+    else if(local == layers[4]) // editor
+    {
+        switch (selection)
+        {
+        case 20:
+            if(confirma && currentTime-previousMillis > 200)
+            {
+                previousMillis = currentTime;
+
+                hora++;
+                Serial.println(hora);
+                delay(200);
+            }
+            break;
+        case 21:
+            if(confirma && currentTime-previousMillis > 200)
+            {
+                previousMillis = currentTime;
+
+                minuto++;
+                Serial.println(minuto);
+                delay(200);
+            }
+            break;
+        case 22:
+            if(confirma && currentTime-previousMillis > 200)
+            {
+                previousMillis = currentTime;
+
+                horarios[index][0] = hora;
+                horarios[index][1] = minuto;
+                SaveArrayToEEPROM();
+            }
+            break;
         
+        default:
+            local = layers[0];
+            break;
+        }
     }
     else
     {
@@ -92,7 +158,11 @@ void loop()
     {
         if (confirma) 
         {
-            local = layers[0]; 
+            if(local != layers[4])
+            {
+                local = layers[0];
+            }
+             
         }
     }
 
@@ -109,6 +179,7 @@ void loop()
     selecChanger();
     Render();
     Checarhora();
+    Serial.println(selection);
 
 }
 void Render()
@@ -210,7 +281,27 @@ void Render()
             lcd.print("Voltar");
         }
         
-    } 
+    }
+    else if(local == layers[4])
+    {
+        lcd.setCursor(0,0);
+        if(hora < 10)
+        {
+            lcd.print("0");
+        }
+        lcd.print(hora);
+        lcd.print(":");
+        if(minuto < 10)
+        {
+            lcd.print("0");
+        }
+        lcd.print(minuto);
+    }
     
 }
 
+void edit()
+{
+    
+    
+}

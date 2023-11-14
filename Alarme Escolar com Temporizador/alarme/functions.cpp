@@ -7,11 +7,12 @@ extern int horarios[][2]; // Matriz de horários
 extern char *local;
 extern int selection;
 extern char layers[4][16];
+extern int horarioSize;
 
 void SaveArrayToEEPROM() 
 {
   int addr = 0;
-  for (int row = 0; row < pointer; row++) {
+  for (int row = 0; row < horarioSize; row++) {
     for (int col = 0; col < 2; col++) {
       EEPROM.update(addr, horarios[row][col]);
       addr++;
@@ -21,12 +22,12 @@ void SaveArrayToEEPROM()
 
 void ReadArrayFromEEPROM() 
 {
-  int horarios[][2] = {};
   int addr = 0;
-  for (int row = 0; row < pointer; row++) {
+  for (int row = 0; row < horarioSize; row++) {
     for (int col = 0; col < 2; col++) {
       horarios[row][col] = EEPROM.read(addr);
       addr++;
+      Serial.println(horarios[row][col]);
     }
   }
 }
@@ -97,41 +98,7 @@ void Mostrarelogio()
     if (segundos < 10)
     {lcd.print("0");}
     lcd.print(segundos);
-    
-    /* 
-    //Mostra a data atual no display
-    lcd.setCursor(0, 3);
-    lcd.print("Data : ");
-    lcd.setCursor(7,3);
-    if (diadomes < 10)
-    {lcd.print("0");}
-    lcd.print(diadomes);
-    lcd.print(".");
-    if (mes < 10)
-    {lcd.print("0");}
-    lcd.print(mes);
-    lcd.print(".");
-    lcd.print(ano);
-    
-    //Mostra o dia da semana no display
-    lcd.setCursor(17, 3);
-    switch(diadasemana)
-    {
-    case 0:lcd.print("Dom");
-    break;
-    case 1:lcd.print("Seg");
-    break;
-    case 2:lcd.print("Ter");
-    break;
-    case 3:lcd.print("Qua");
-    break;
-    case 4:lcd.print("Qui");
-    break;
-    case 5:lcd.print("Sex");
-    break;
-    case 6:lcd.print("Sab");
-    } 
-    */
+
 }
 
 void Checarhora()
@@ -150,7 +117,7 @@ void Checarhora()
 
     for(int i = 0; i < 15; i++)
     {
-        Serial.println(horarios[i][0]);
+        //Serial.println(horarios[i][0]);
         if(horarios[i][0] == horas)
         {
             if(horarios[i][1] == minutos)
@@ -257,9 +224,10 @@ void selecChanger()
         if (selection > 19 || selection < 13)
             selection = 13;
     }
-    else
+    else if (local == layers[4])
     {
-        selection = 0;
+         if (selection > 23 || selection < 20)
+            selection = 20;
     }
 }
 
