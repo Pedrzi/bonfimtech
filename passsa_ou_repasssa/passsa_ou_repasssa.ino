@@ -1,46 +1,161 @@
-// C++ code
-//
-  #define ledpt 13
-  #define ledpl 10
-  #define pl 11 
-  #define pt 12
+int conta1;
+int conta2;
 
-  
-void setup()
-{
-  Serial.begin (9600);
-  pinMode(ledpt, OUTPUT);
-  pinMode(ledpl, OUTPUT);
-  pinMode(pt, INPUT_PULLUP);
-  pinMode(pl, INPUT_PULLUP);
+//Botões que incrementam os pontos
+int BtnPlacarVermelho = A0;
+int BtnPlacarAzul = A1;
+
+//Botões que acionam os leds
+int BtnVermelho = A2;
+int BtnAzul = A3;
+
+//Portas que ligam os leds
+int LedVermelhoRele = A5;
+int LedAzulRele = A4;
+
+byte displaySeteSeg1[10][7] = {
+
+  { 1, 1, 1, 1, 1, 1, 0 },  //DIGITO 0
+  { 0, 1, 1, 0, 0, 0, 0 },  //DIGITO 1
+  { 1, 1, 0, 1, 1, 0, 1 },  //DIGITO 2
+  { 1, 1, 1, 1, 0, 0, 1 },  //DIGITO 3
+  { 0, 1, 1, 0, 0, 1, 1 },  //DIGITO 4
+  { 1, 0, 1, 1, 0, 1, 1 },  //DIGITO 5
+  { 1, 0, 1, 1, 1, 1, 1 },  //DIGITO 6
+  { 1, 1, 1, 0, 0, 0, 0 },  //DIGITO 7
+  { 1, 1, 1, 1, 1, 1, 1 },  //DIGITO 8
+  { 1, 1, 1, 1, 0, 1, 1 }   //DIGITO 9
+
+};
+
+byte displaySeteSeg2[10][7] = {
+
+  { 1, 1, 1, 1, 1, 1, 0 },  //DIGITO 0
+  { 0, 1, 1, 0, 0, 0, 0 },  //DIGITO 1
+  { 1, 1, 0, 1, 1, 0, 1 },  //DIGITO 2
+  { 1, 1, 1, 1, 0, 0, 1 },  //DIGITO 3
+  { 0, 1, 1, 0, 0, 1, 1 },  //DIGITO 4
+  { 1, 0, 1, 1, 0, 1, 1 },  //DIGITO 5
+  { 1, 0, 1, 1, 1, 1, 1 },  //DIGITO 6
+  { 1, 1, 1, 0, 0, 0, 0 },  //DIGITO 7
+  { 1, 1, 1, 1, 1, 1, 1 },  //DIGITO 8
+  { 1, 1, 1, 1, 0, 1, 1 }   //DIGITO 9
+
+};
+
+void setup() {
+  Serial.begin(9600);
+
+  //Definindo pinos como saída
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+
+  pinMode(BtnPlacarVermelho, INPUT_PULLUP);
+  pinMode(BtnPlacarAzul, INPUT_PULLUP);
+
+  pinMode(BtnVermelho, INPUT_PULLUP);
+  pinMode(BtnAzul, INPUT_PULLUP);
+
+  pinMode(LedVermelhoRele, OUTPUT);
+  pinMode(LedAzulRele, OUTPUT);
+
+  //inicializa display com número 0
+  conta1 = 0;
+  conta2 = 0;
+  ligaSegmentosDisplay1(conta1);
+  ligaSegmentosDisplay2(conta2);
 }
 
-void loop()
-{
+void loop() {
+  Serial.println(digitalRead(BtnVermelho));
 
- Serial.print (digitalRead(pt));
-  
-  if(digitalRead(pt) == LOW  && digitalRead(pl) == HIGH) {
-   
-      digitalWrite(ledpt, HIGH);
-      delay(3500);
-      digitalWrite(ledpt, LOW);
-      
-      
+
+  if (!digitalRead(BtnVermelho) && digitalRead(BtnAzul)) {
+    digitalWrite(LedAzulRele, LOW);
+    digitalWrite(LedVermelhoRele, HIGH);
+    Serial.println("BtnAzul");
+    delay(2000);
+  } else {
+    digitalWrite(LedVermelhoRele, LOW);
+  }
+
+  if (digitalRead(BtnVermelho) && !digitalRead(BtnAzul)) {
+    digitalWrite(LedVermelhoRele, LOW);
+    digitalWrite(LedAzulRele, HIGH);
+    Serial.println("BtnVermelho");
+    delay(2000);
+  } else {
+    digitalWrite(LedAzulRele, LOW);
+  }
+
+  if (digitalRead(BtnPlacarVermelho) == LOW) {  //Se o botão for pressionado soma +1 no display
+
+    delay(500);
+
+    conta1++;  //incremento
+
+    if (conta1 == 10) {  //Se passar de 9 reseta o display para 0
+      conta1 = 0;
+      ligaSegmentosDisplay1(conta1);
+    } else {  //Se não mostra no display o próximo número
+      ligaSegmentosDisplay1(conta1);
     }
+  }
 
-  if(digitalRead(pl) == LOW  && digitalRead(pt) == HIGH) {
-   
-      digitalWrite(ledpl, HIGH);
-      delay(3500);
-      digitalWrite(ledpl, LOW);
-     
-      
-    } 
+  if (digitalRead(BtnPlacarAzul) == LOW) {  //Se o botão for pressionado soma +1 no display
 
-  
-  
+    delay(500);
 
+    conta2++;  //incremento
+
+    if (conta2 == 10) {  //Se passar de 9 reseta o display para 0
+      conta2 = 0;
+      ligaSegmentosDisplay2(conta2);
+    } else {  //Se não mostra no display o próximo número
+      ligaSegmentosDisplay2(conta2);
+    }
+  }
+
+  if (digitalRead(BtnPlacarVermelho) == LOW && digitalRead(BtnPlacarAzul) == LOW) {
+    conta1 = 0;
+    conta2 = 0;
+    ligaSegmentosDisplay1(conta1);
+    ligaSegmentosDisplay2(conta2);
+    delay(1500);
+  }
 }
 
- 
+void ligaSegmentosDisplay1(byte digito) {  //função para acionar o display com o digito correspondente
+
+  byte pino = 0;
+
+  //Liga os segmentos de acordo com o digito correspondente
+  for (byte contadorSegmentos = 0; contadorSegmentos < 7; ++contadorSegmentos) {
+    digitalWrite(pino, displaySeteSeg1[digito][contadorSegmentos]);
+    ++pino;
+  }
+}
+
+void ligaSegmentosDisplay2(byte digito) {  //função para acionar o display com o digito correspondente
+
+  byte pino = 7;
+
+  //Liga os segmentos de acordo com o digito correspondente
+  for (byte contadorSegmentos = 0; contadorSegmentos < 7; ++contadorSegmentos) {
+    digitalWrite(pino, displaySeteSeg2[digito][contadorSegmentos]);
+    ++pino;
+  }
+}
