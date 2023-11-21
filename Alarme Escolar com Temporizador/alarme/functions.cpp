@@ -8,49 +8,15 @@ extern char *local;
 extern int selection;
 extern char layers[4][16];
 extern int horarioSize;
-
-void SaveArrayToEEPROM() 
-{
-  int addr = 0;
-  for (int row = 0; row < horarioSize; row++) {
-    for (int col = 0; col < 2; col++) {
-      EEPROM.update(addr, horarios[row][col]);
-      addr++;
-    }
-  }
-}
-
-void ReadArrayFromEEPROM() 
-{
-  int addr = 0;
-  for (int row = 0; row < horarioSize; row++) {
-    for (int col = 0; col < 2; col++) {
-      horarios[row][col] = EEPROM.read(addr);
-      addr++;
-      Serial.println(horarios[row][col]);
-    }
-  }
-}
-
-byte ConverteParaBCD(byte val)
-{ 
- // Converte o número de decimal para BCD
- return ( (val/10*16) + (val%10) );
-}
- 
-byte ConverteparaDecimal(byte val) 
-{ 
- // Converte de BCD para decimal
- return ( (val/16*10) + (val%16) );
-}
+extern bool alarm;
 
 void SelecionaDataeHora()
 {
-    byte segundos = 25; // Valores de 0 a 59
-    byte minutos = 57; // Valores de 0 a 59
-    byte horas = 0; // Valores de 0 a 23
+    byte segundos = 15; // Valores de 0 a 59
+    byte minutos = 27; // Valores de 0 a 59
+    byte horas = 16; // Valores de 0 a 23
     byte diadasemana = 2; // Valores de 0 a 6 (0=Domingo, 1 = Segunda...)
-    byte diadomes = 14; // Valores de 1 a 31
+    byte diadomes = 21; // Valores de 1 a 31
     byte mes = 11; // Valores de 1 a 12
     byte ano = 23; // Valores de 0 a 99
     Wire.beginTransmission(DS1307_ADDRESS);
@@ -67,7 +33,8 @@ void SelecionaDataeHora()
     Wire.write(ConverteParaBCD(mes));
     Wire.write(ConverteParaBCD(ano));
     Wire.write(zero); //Start no CI
-    Wire.endTransmission(); 
+    Wire.endTransmission();
+    Serial.println("Data alterada");
 }
 
 void Mostrarelogio()
@@ -101,7 +68,7 @@ void Mostrarelogio()
 
 }
 
-void Checarhora()
+void Checarhora(long previousMillis, unsigned long currentTime)
 {
     Wire.beginTransmission(DS1307_ADDRESS);
     Wire.write(zero);
@@ -114,15 +81,22 @@ void Checarhora()
     int diadomes = ConverteparaDecimal(Wire.read());
     int mes = ConverteparaDecimal(Wire.read());
     int ano = ConverteparaDecimal(Wire.read());
-
     for(int i = 0; i < 15; i++)
     {
         //Serial.println(horarios[i][0]);
         if(horarios[i][0] == horas)
         {
-            if(horarios[i][1] == minutos)
+            if(horarios[i][1] == minutos && alarm == false)
             {
-                Serial.println("ALARMEEEEE!!!!!!!!!!");
+                digitalWrite(relay, HIGH);
+                Serial.println("Alarme!!!!!");
+                if(currentTime - previousMillis >= 12000)
+                {
+                    alarm = true;
+                }
+            }else
+            {
+                digitalWrite(relay, LOW);
             }
         }
     }
@@ -141,6 +115,11 @@ void StartButtons()
 {
     pinMode(mudar, INPUT_PULLUP);
     pinMode(confirmar, INPUT_PULLUP);
+}
+
+void StartRelay()
+{
+    pinMode(mudar, OUTPUT);
 }
 
 void StartEEPROM()
@@ -231,3 +210,37 @@ void selecChanger()
     }
 }
 
+void SaveArrayToEEPROM() 
+{
+  int addr = 0;
+  for (int row = 0; row < horarioSize; row++) {
+    for (int col = 0; col < 2; col++) {
+      EEPROM.update(addr, horarios[row][col]);
+      addr++;
+    }
+  }
+}
+
+void ReadArrayFromEEPROM() 
+{
+  int addr = 0;
+  for (int row = 0; row < horarioSize; row++) {
+    for (int col = 0; col < 2; col++) {
+      horarios[row][col] = EEPROM.read(addr);
+      addr++;
+      Serial.println(horarios[row][col]);
+    }
+  }
+}
+
+byte ConverteParaBCD(byte val)
+{ 
+ // Converte o número de decimal para BCD
+ return ( (val/10*16) + (val%10) );
+}
+ 
+byte ConverteparaDecimal(byte val)
+{ 
+ // Converte de BCD para decimal
+ return ( (val/16*10) + (val%16) );
+}
