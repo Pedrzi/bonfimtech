@@ -10,6 +10,7 @@ LiquidCrystal lcd(9,8,7,6,5,4); // pins do LCD
 
 char daysOfTheWeek[7][12] = {"Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"};
 
+bool alarm = false;
 int selection         =  0; // seleção atual do Render
 char *local           = layers[0]; // layer atual do Render
 int pointer           =  0; // índice atual da matriz de horários
@@ -30,6 +31,7 @@ int minuto = 0;
 int index = 0;
 
 long previousMillis = 0;
+unsigned long currentTime;
 const long second = 1000;
 
 void setup() 
@@ -46,28 +48,37 @@ void setup()
     StartButtons();
     Serial.println("Buttons started");
 
-    //SelecionaDataeHora();
+    StartRelay();
+    Serial.println("Relay started");
+
+    SelecionaDataeHora();
     //SaveArrayToEEPROM();
-    ReadArrayFromEEPROM();
+    //ReadArrayFromEEPROM();
     
     delay(100);
 }
 
 void loop()
 {
-    unsigned long currentTime = millis();
-    int muda = !digitalRead(mudar);
-    bool confirma = false;
-    if(!digitalRead(confirmar) && currentTime - previousMillis > 200)
+    unsigned long currentTime = millis64();
+    if(millis64()-previousMillis >= second*60)
     {
         previousMillis = currentTime;
+        alarm = false;
+    }
+    int muda = !digitalRead(mudar); 
+    int confirma = false;
+    if(!digitalRead(confirmar) && currentTime-previousMillis > 200)
+    {
+        previousMillis = currentTime;
+
         confirma = true;
         lcd.clear();
     }
  
     if(local == layers[0])
     {
-        
+       
     }
     else if (local == layers[1])
     {
@@ -137,7 +148,11 @@ void loop()
             break;
         
         default:
-            local = layers[0];
+            if(confirma)
+            {
+                local = layers[0];
+            }
+            
             break;
         }
     }
@@ -174,11 +189,12 @@ void loop()
         selection++;
         lcd.clear();
     }
+    
 
     // Render the 'local'
     selecChanger();
     Render();
-    Checarhora();
+    Checarhora(previousMillis, millis64());
     Serial.println(selection);
 
 }
