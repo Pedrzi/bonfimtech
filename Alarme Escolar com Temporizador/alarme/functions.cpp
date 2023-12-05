@@ -9,6 +9,7 @@ extern int selection;
 extern char layers[4][16];
 extern int horarioSize;
 extern bool alarm;
+extern bool alarmando;
 
 void SelecionaDataeHora()
 {
@@ -96,7 +97,11 @@ void Checarhora(long previousMillis, unsigned long currentTime)
                 }
             }else
             {
-                digitalWrite(relay, LOW);
+                if(alarmando)
+                {
+                    digitalWrite(relay, LOW);
+                }
+                
             }
         }
     }
@@ -119,7 +124,7 @@ void StartButtons()
 
 void StartRelay()
 {
-    pinMode(mudar, OUTPUT);
+    pinMode(relay, OUTPUT);
 }
 
 void StartEEPROM()
@@ -145,13 +150,14 @@ void StartLCD()
     analogWrite(3, Contrast);
 
     lcd.begin(16, 2);
-
     lcd.setCursor(0,0);
-    lcd.print("Ola!");
+    lcd.noCursor();
+    lcd.noBlink();
+    //lcd.print("Ola!");
     //delay(1000);
 
     //LoadingAnim();
-    lcd.clear();
+    //lcd.clear();
 }
 
 void LoadingAnim()
