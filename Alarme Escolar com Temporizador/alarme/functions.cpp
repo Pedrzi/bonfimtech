@@ -9,6 +9,7 @@ extern int selection;
 extern char layers[4][16];
 extern int horarioSize;
 extern bool alarm;
+extern unsigned long alarme;
 extern bool alarmando;
 
 void SelecionaDataeHora()
@@ -84,24 +85,13 @@ void Checarhora(long previousMillis, unsigned long currentTime)
     int ano = ConverteparaDecimal(Wire.read());
     for(int i = 0; i < 15; i++)
     {
-        //Serial.println(horarios[i][0]);
         if(horarios[i][0] == horas)
         {
-            if(horarios[i][1] == minutos && alarm == false)
+            if(horarios[i][1] == minutos && !alarm)
             {
+                alarm = !alarm;
+                alarme = millis64();
                 digitalWrite(relay, HIGH);
-                Serial.println("Alarme!!!!!");
-                if(currentTime - previousMillis >= 12000)
-                {
-                    alarm = true;
-                }
-            }else
-            {
-                if(alarmando)
-                {
-                    digitalWrite(relay, LOW);
-                }
-                
             }
         }
     }
@@ -156,8 +146,8 @@ void StartLCD()
     //lcd.print("Ola!");
     //delay(1000);
 
-    //LoadingAnim();
-    //lcd.clear();
+    LoadingAnim();
+    lcd.clear();
 }
 
 void LoadingAnim()

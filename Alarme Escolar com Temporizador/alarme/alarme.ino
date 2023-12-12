@@ -35,6 +35,7 @@ int index = 0;
 
 long previousMillis = 0;
 unsigned long currentTime;
+unsigned long alarme;
 const long second = 1000;
 
 void setup()
@@ -58,7 +59,7 @@ void setup()
 
     // SelecionaDataeHora();
     // SaveArrayToEEPROM();
-    // ReadArrayFromEEPROM();
+    ReadArrayFromEEPROM();
 
     delay(100);
 }
@@ -69,10 +70,13 @@ void loop()
     bool switch_alarme = false;
     
     unsigned long currentTime = millis64();
-    if (millis64() - previousMillis >= second * 60)
+    if (currentTime - alarme >= second * 10 && digitalRead(relay))
     {
-        previousMillis = currentTime;
-        alarm = false;
+        alarme = currentTime;
+        digitalWrite(relay, LOW);
+    }
+    if (currentTime - alarme >= second * 60){
+        alarm = !alarm;
     }
     int muda = !digitalRead(mudar);
     int confirma = !digitalRead(confirmar);
