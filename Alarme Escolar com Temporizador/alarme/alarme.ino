@@ -4,23 +4,24 @@
 #include <EEPROM.h>
 #include "Wire.h"
 
-char layers[][16] = {"menu", "turnos", "manha", "tarde", "edição"};
+char layers[][16] = {"menu", "turnos", "manha", "tarde", "edição", "configuração"};
 byte zero = 0x00;
 LiquidCrystal lcd(9, 8, 7, 6, 5, 4); // pins do LCD
 
 char daysOfTheWeek[7][12] = {"Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"};
 
 byte barra[8] = {
-  B11111,
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B00000,
+    B11111,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
 };
-
-bool alarmando = false;
+bool switch_alarme = false;
+int alarmeDuracao = 1;
+bool alarmando = true;
 bool alarm = false;
 int selection = 0;       // seleção atual do Render
 char *local = layers[0]; // layer atual do Render
@@ -38,68 +39,158 @@ unsigned long currentTime;
 unsigned long alarme;
 const long second = 1000;
 
+bool reset = false;
+
+class BlinkLCD
+{
+
+private:
+    byte m_blinkState, m_startPosition, m_dataLength;
+    unsigned long m_dataToBlink, m_previousMillis, m_blinkRate;
+    char m_text[16 + 1];
+
+public:
+    BlinkLCD() : m_blinkState(0), m_startPosition(0), m_dataLength(0),
+                 m_dataToBlink(0), m_previousMillis(0), m_blinkRate(500),
+                 m_text() {}
+
+    void Update()
+    {
+
+        unsigned long m_currentMillis = millis();
+
+        if (m_currentMillis - m_previousMillis >= m_blinkRate)
+        {
+
+            byte m_row = 0;
+            m_blinkState = !m_blinkState;
+            m_previousMillis = m_currentMillis;
+
+            if (m_startPosition > 15)
+            {
+                m_startPosition -= 16;
+                m_row = 1;
+            }
+
+            lcd.setCursor(m_startPosition, m_row);
+
+            if (m_blinkState)
+            {
+                if ((unsigned)strlen(m_text) > 0)
+                {
+                    lcd.print(m_text);
+                }
+                else
+                {
+                    lcd.print(m_dataToBlink);
+                }
+            }
+            else
+            {
+                for (byte i = 0; i < m_dataLength; i++)
+                {
+                    lcd.write(byte(0));
+                }
+            }
+        }
+    }
+
+    void SetBlinkRate(unsigned long blinkRate)
+    {
+        m_blinkRate = blinkRate;
+    }
+
+    void SetNumber(unsigned long dataToBlink)
+    {
+        m_dataToBlink = dataToBlink;
+    }
+
+    void SetLength(byte dataLength)
+    {
+        m_dataLength = dataLength;
+    }
+
+    // LCD top row, columns 0 - 15
+    // LCD Bottom row, 16 - 31
+    void SetStartPosition(byte startPosition)
+    {
+        m_startPosition = startPosition;
+    }
+
+    void SetText(char text[])
+    {
+        strcpy(m_text, text);
+    }
+};
+
+BlinkLCD TopRowLCD;
+BlinkLCD BottomRowLCD;
+BlinkLCD BottomRowLCDtext;
+int durationPointer = 180;
 void setup()
 {
+
     Serial.begin(9600);
     Wire.begin();
 
     lcd.createChar(0, barra);
-
-    StartLCD();
-    Serial.println("LCD started");
-
-    StartEEPROM();
-    Serial.println("EEPROM started");
-
+    //SelecionaDataeHora();
     StartButtons();
-    Serial.println("Buttons started");
-
+    StartLCD();
+    StartEEPROM();
     StartRelay();
-    Serial.println("Relay started");
 
-    // SelecionaDataeHora();
-    // SaveArrayToEEPROM();
-    ReadArrayFromEEPROM();
+    
+    if (!reset)
+    {
+        ReadArrayFromEEPROM();
+        alarmeDuracao = EEPROM.read(durationPointer);
+    }
+    else
+    {
+        SaveArrayToEEPROM();
+        EEPROM.write(durationPointer, alarmeDuracao);
+    }
 
     delay(100);
 }
 
+int alarmeDuracaoTemp = EEPROM.read(durationPointer);
 void loop()
 {
-    
-    bool switch_alarme = false;
-    
+    if (!digitalRead(confirmar) && !digitalRead(mudar))
+    {
+        switch_alarme = true;
+        if (currentTime - previousMillis > second)
+        {
+            Serial.println("ALARME");
+            digitalWrite(relay, HIGH);
+            lcd.clear();
+            previousMillis = currentTime;
+            alarmando = false;
+            delay(150);
+        }
+    }
+    else
+    {
+        switch_alarme = false;                       
+        alarmando = true;
+    }
+
     unsigned long currentTime = millis64();
-    if (currentTime - alarme >= second * 10 && digitalRead(relay))
+    if (currentTime - alarme >= alarmeDuracao * second && digitalRead(relay) && !switch_alarme)
     {
         alarme = currentTime;
         digitalWrite(relay, LOW);
     }
-    if (currentTime - alarme >= second * 60){
+    if (currentTime - alarme >= second * 60)
+    {
         alarm = !alarm;
     }
     int muda = !digitalRead(mudar);
     int confirma = !digitalRead(confirmar);
 
-    if (!digitalRead(confirmar) && !digitalRead(mudar))
-    {
-        switch_alarme = true;
-        if(currentTime-previousMillis>second && alarmando)
-        {
-            Serial.println("ALARME");
-            digitalWrite(10, HIGH);
-            lcd.clear();
-            previousMillis = currentTime;
-            alarmando = false;
-        }
-    }
-    if(!alarmando && digitalRead(confirmar) && digitalRead(mudar))
-    {
-        Serial.println("acabou o alarme");
-        digitalWrite(10, LOW);
-        alarmando = true;
-    }
-
+    
     if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
     {
         lcd.clear();
@@ -107,21 +198,48 @@ void loop()
 
     if (local == layers[0])
     {
+        if (muda && currentTime - previousMillis > 200 && !switch_alarme)
+        {
+            previousMillis = currentTime;
+
+            selection += 30;
+            lcd.clear();
+        }
     }
     else if (local == layers[1])
     {
-    }
+        switch (selection)
+        {
+        case 3:
+            if (confirma && currentTime - previousMillis > 200 && !switch_alarme)
+            {
+                previousMillis = currentTime;
+                local = layers[0];
+                lcd.clear();
+            }
+            break;
+        }
+    }    
     else if (local == layers[2]) // manha
     {
         if (selection < 12)
         {
-            if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
             {
                 // enviar horário para o editor de horários
+                previousMillis = currentTime;
                 hora = horarios[selection - 4][0];
                 minuto = horarios[selection - 4][1];
                 index = selection - 4;
                 local = layers[4];
+            }
+        }
+        else
+        {
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
+            {
+                previousMillis = currentTime;
+                local = layers[0];
             }
         }
     }
@@ -129,7 +247,7 @@ void loop()
     {
         if (selection < 19)
         { // 16 24 21
-            if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
             {
                 // enviar horário para o editor de horário
                 hora = horarios[selection - 5][0];
@@ -137,19 +255,29 @@ void loop()
                 index = selection - 5;
                 local = layers[4];
             }
+            
+           
         }
+        else
+            {
+                if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
+                {
+                    previousMillis = currentTime;
+                    local = layers[0];
+                }
+            }
     }
     else if (local == layers[4]) // editor
     {
         switch (selection)
         {
         case 20:
-            if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
             {
                 previousMillis = currentTime;
 
                 hora++;
-                if(hora > 23)
+                if (hora > 23)
                 {
                     hora = 0;
                 }
@@ -158,12 +286,12 @@ void loop()
             }
             break;
         case 21:
-            if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
             {
                 previousMillis = currentTime;
 
                 minuto++;
-                if(minuto > 59)
+                if (minuto > 59)
                 {
                     minuto = 0;
                 }
@@ -172,7 +300,7 @@ void loop()
             }
             break;
         case 22:
-            if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
             {
                 previousMillis = currentTime;
 
@@ -184,7 +312,7 @@ void loop()
             break;
 
         default:
-            if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
             {
                 lcd.clear();
                 local = layers[0];
@@ -193,40 +321,77 @@ void loop()
             break;
         }
     }
-    else
+    else if (local == layers[5])
     {
-        local = layers[0];
+
+        switch (selection)
+        {
+        case 31:
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
+            {
+                previousMillis = currentTime;
+                alarmeDuracaoTemp += 1;
+                if (alarmeDuracaoTemp > 15)
+                {
+                    alarmeDuracaoTemp = 1;
+                }
+            }
+            break;
+        case 32:
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
+            {
+                previousMillis = currentTime;
+                alarmeDuracao = alarmeDuracaoTemp;
+                EEPROM.write(durationPointer, alarmeDuracaoTemp);
+                local = layers[0];
+            }
+            break;
+        default:
+            if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
+            {
+                previousMillis = currentTime;
+                alarmeDuracaoTemp = alarmeDuracao;
+                local = layers[0];
+            }
+            break;
+        }
     }
 
     if (selection < 3)
     {
-        if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+        if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
         {
             local = layers[selection + 1];
         }
     }
     else
     {
-        if (!digitalRead(confirmar) && currentTime - previousMillis > 200&& !switch_alarme)
+        if (!digitalRead(confirmar) && currentTime - previousMillis > 200 && !switch_alarme)
         {
             if (local != layers[4])
             {
                 local = layers[0];
             }
+            if (selection == 30 && !switch_alarme)
+            {
+                local = layers[5];
+            }
         }
     }
 
     // button check
-    if (confirma && currentTime - previousMillis > 200&& !switch_alarme)
+    if (confirma && currentTime - previousMillis > 200 && !switch_alarme)
     {
         previousMillis = currentTime;
         lcd.clear();
     }
-    if (muda && currentTime - previousMillis > 200&& !switch_alarme)
+    if (muda && currentTime - previousMillis > 200 && !switch_alarme)
     {
         previousMillis = currentTime;
-
-        selection++;
+        if(local != layers[0])
+        {
+            selection += 1;
+        }
         lcd.clear();
     }
 
@@ -234,6 +399,7 @@ void loop()
     selecChanger();
     Render(alarmando);
     Checarhora(previousMillis, millis64());
+    Serial.println(selection);
 }
 void Render(bool alarmando)
 {
@@ -253,14 +419,28 @@ void Render(bool alarmando)
     {
         Mostrarelogio();
 
-        lcd.setCursor(5, 1);
-        if(!alarmando){
-            lcd.print("alarme");
+       
+        if (!alarmando)
+        {
+            lcd.setCursor(5, 1);
+            lcd.print("Alarme");
         }
-        else{
-            lcd.print("listar");
+        else
+        {
+
+            switch (selection)
+            {
+            case 30:
+                lcd.setCursor(3, 1);
+                lcd.print("Configurar");
+                break;
+
+            default:
+                lcd.setCursor(2, 1);
+                lcd.print("Ver Horarios");
+                break;
+            }
         }
-        
     }
 
     else if (local == layers[1]) // layer 1 turnos
@@ -361,25 +541,54 @@ void Render(bool alarmando)
             switch (selection)
             {
             case 20:
-                lcd.setCursor(6,1);
-                lcd.write(byte(0));
-                lcd.write(byte(0));
+                lcd.setCursor(6, 1);
+                BottomRowLCDtext.SetText("  ");
+                BottomRowLCDtext.SetStartPosition(22);
+                BottomRowLCDtext.SetLength(2);
+                BottomRowLCDtext.SetBlinkRate(500);
+                BottomRowLCDtext.Update();
                 break;
             case 21:
-                lcd.setCursor(9,1);
-                lcd.write(byte(0));
-                lcd.write(byte(0));
+                lcd.setCursor(9, 1);
+                BottomRowLCDtext.SetText("  ");
+                BottomRowLCDtext.SetStartPosition(25);
+                BottomRowLCDtext.SetLength(2);
+                BottomRowLCDtext.SetBlinkRate(500);
+                BottomRowLCDtext.Update();
                 break;
             case 22:
-                lcd.setCursor(4,1);
+                lcd.setCursor(4, 1);
                 lcd.print("Confirmar");
                 break;
-            
+
             case 23:
                 lcd.setCursor(4, 1);
                 lcd.print("Cancelar");
                 break;
             }
+        }
+    }
+    else if (local == layers[5])
+    {
+        lcd.setCursor(1, 0);
+        lcd.print("Periodo em Seg");
+        switch (selection)
+        {
+        case 31:
+            lcd.setCursor(2, 1);
+            lcd.print(alarmeDuracaoTemp);
+            lcd.print(" ");
+            lcd.print("Segundos");
+            break;
+        case 32:
+            lcd.setCursor(4, 1);
+            lcd.print("Confirmar");
+            break;
+
+        default:
+            lcd.setCursor(4, 1);
+            lcd.print("Cancelar");
+            break;
         }
     }
 }

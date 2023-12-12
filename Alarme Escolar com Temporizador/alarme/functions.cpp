@@ -11,15 +11,16 @@ extern int horarioSize;
 extern bool alarm;
 extern unsigned long alarme;
 extern bool alarmando;
+extern bool reset;
 
 void SelecionaDataeHora()
 {
-    byte segundos = 15; // Valores de 0 a 59
-    byte minutos = 27; // Valores de 0 a 59
-    byte horas = 16; // Valores de 0 a 23
+    byte segundos = 20; // Valores de 0 a 59
+    byte minutos = 57; // Valores de 0 a 59
+    byte horas = 14; // Valores de 0 a 23
     byte diadasemana = 2; // Valores de 0 a 6 (0=Domingo, 1 = Segunda...)
-    byte diadomes = 21; // Valores de 1 a 31
-    byte mes = 11; // Valores de 1 a 12
+    byte diadomes = 12; // Valores de 1 a 31
+    byte mes = 12; // Valores de 1 a 12
     byte ano = 23; // Valores de 0 a 99
     Wire.beginTransmission(DS1307_ADDRESS);
     // Stop no CI para que o mesmo possa receber os dados
@@ -83,18 +84,23 @@ void Checarhora(long previousMillis, unsigned long currentTime)
     int diadomes = ConverteparaDecimal(Wire.read());
     int mes = ConverteparaDecimal(Wire.read());
     int ano = ConverteparaDecimal(Wire.read());
-    for(int i = 0; i < 15; i++)
+
+    if(diadasemana < 6 && diadasemana > 0)
     {
-        if(horarios[i][0] == horas)
+        for(int i = 0; i < 15; i++)
         {
-            if(horarios[i][1] == minutos && !alarm)
+            if(horarios[i][0] == horas)
             {
-                alarm = !alarm;
-                alarme = millis64();
-                digitalWrite(relay, HIGH);
+                if(horarios[i][1] == minutos && !alarm)
+                {
+                    alarm = !alarm;
+                    alarme = millis64();
+                    digitalWrite(relay, HIGH);
+                }
             }
         }
     }
+    
     
 }
 
@@ -110,11 +116,13 @@ void StartButtons()
 {
     pinMode(mudar, INPUT_PULLUP);
     pinMode(confirmar, INPUT_PULLUP);
+    Serial.println("Buttons started");
 }
 
 void StartRelay()
 {
     pinMode(relay, OUTPUT);
+    Serial.println("Relay started");
 }
 
 void StartEEPROM()
@@ -133,6 +141,7 @@ void StartEEPROM()
 
     Serial.print("Pointer index is at: ");
     Serial.println(pointer);
+    Serial.println("EEPROM started");
 }
 
 void StartLCD()
@@ -147,7 +156,11 @@ void StartLCD()
     //delay(1000);
 
     LoadingAnim();
+    if(!digitalRead(mudar) && !digitalRead(confirmar)){
+        reset = true;
+    }
     lcd.clear();
+    Serial.println("LCD started");
 }
 
 void LoadingAnim()
@@ -180,7 +193,10 @@ void selecChanger()
 {   
     if(local == layers[0])
     {
-         selection = 0;
+         if(selection < 30 || selection > 30)
+         {
+            selection = 0;
+         }
     }
     else if (local == layers[1])
     {
@@ -203,6 +219,11 @@ void selecChanger()
     {
          if (selection > 23 || selection < 20)
             selection = 20;
+    }
+    else if(local == layers[5])
+    {
+        if (selection > 33 || selection < 31)
+            selection = 31;
     }
 }
 
