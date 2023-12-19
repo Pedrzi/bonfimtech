@@ -59,6 +59,7 @@ void loop()
     {
         previousMillis = currentTime;
         muda = true;
+        selection+=1;
         lcd.clear();
     }
 
