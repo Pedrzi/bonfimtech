@@ -1,0 +1,7 @@
+{
+    "configuration": "cpu=atmega328old",
+    "board": "arduino:avr:nano",
+    "port": "/dev/ttyUSB0",
+    "programmer": "avrispmkii",
+    "sketch": "alarme.ino"
+}
