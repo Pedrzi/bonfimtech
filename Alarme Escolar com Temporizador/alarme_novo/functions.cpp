@@ -32,12 +32,12 @@ byte barra[8] = {
     B00000,
 };
 
-extern int horarios[][2]; // Matriz de horários
+
+
 extern char *local;
 extern int selection;
 extern bool alarm;
 extern unsigned long alarme;
-extern bool alarmando;
 
 void mudarHorario()
 {

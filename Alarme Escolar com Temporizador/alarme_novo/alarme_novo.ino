@@ -74,7 +74,8 @@ void loop()
     renderUI();
 }
 
-void handleAlarm(unsigned long currentTime) {
+void handleAlarm(unsigned long currentTime) 
+{
     // Handle alarm logic
     // Check alarm conditions, set/reset alarm, etc.
 
@@ -118,20 +119,16 @@ void handleAlarm(unsigned long currentTime) {
 
 }
 
-void handleInputs(unsigned long currentTime) {
-    // Handle different input cases based on 'local' and 'selection'
-    // Refactor the input handling and state transitions
-
+void handleInputs(unsigned long currentTime) 
+{
     int index;
 
     if (local == layers[0])
-    {
+    {   
+        //pedaço de código que faz possível ter uma tela de configuração para a duração do alarme
         if (muda && !switch_alarme)
         {
-            previousMillis = currentTime;
-
             selection += 30;
-            lcd.clear();
         }
     }
     else if (local == layers[1])
@@ -141,9 +138,7 @@ void handleInputs(unsigned long currentTime) {
         case 3:
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
                 local = layers[0];
-                lcd.clear();
             }
             break;
         }
@@ -155,10 +150,9 @@ void handleInputs(unsigned long currentTime) {
             if (confirma && !switch_alarme)
             {
                 // enviar horário para o editor de horários
-                previousMillis = currentTime;
-                hora = horarios[selection - 4][0];
-                minuto = horarios[selection - 4][1];
                 index = selection - 4;
+                hora = horarios[index][0];
+                minuto = horarios[index][1];
                 local = layers[4];
             }
         }
@@ -166,7 +160,6 @@ void handleInputs(unsigned long currentTime) {
         {
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
                 local = layers[0];
             }
         }
@@ -178,9 +171,9 @@ void handleInputs(unsigned long currentTime) {
             if (confirma && !switch_alarme)
             {
                 // enviar horário para o editor de horário
-                hora = horarios[selection - 5][0];
-                minuto = horarios[selection - 5][1];
                 index = selection - 5;
+                hora = horarios[index][0];
+                minuto = horarios[index][1];
                 local = layers[4];
             }
             
@@ -190,7 +183,6 @@ void handleInputs(unsigned long currentTime) {
             {
                 if (confirma && !switch_alarme)
                 {
-                    previousMillis = currentTime;
                     local = layers[0];
                 }
             }
@@ -202,8 +194,6 @@ void handleInputs(unsigned long currentTime) {
         case 20:
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
-
                 hora++;
                 if (hora > 23)
                 {
@@ -216,7 +206,6 @@ void handleInputs(unsigned long currentTime) {
         case 21:
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
 
                 minuto++;
                 if (minuto > 59)
@@ -230,8 +219,6 @@ void handleInputs(unsigned long currentTime) {
         case 22:
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
-
                 horarios[index][0] = hora;
                 horarios[index][1] = minuto;
                 SaveArrayToEEPROM();
@@ -242,7 +229,6 @@ void handleInputs(unsigned long currentTime) {
         default:
             if (confirma && !switch_alarme)
             {
-                lcd.clear();
                 local = layers[0];
             }
 
@@ -257,7 +243,6 @@ void handleInputs(unsigned long currentTime) {
         case 31:
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
                 alarmeDuracaoTemporario += 1;
                 if (alarmeDuracaoTemporario > 15)
                 {
@@ -268,7 +253,6 @@ void handleInputs(unsigned long currentTime) {
         case 32:
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
                 alarmeDuracao = alarmeDuracaoTemporario;
                 EEPROM.write(durationPointer, alarmeDuracaoTemporario);
                 local = layers[0];
@@ -277,7 +261,6 @@ void handleInputs(unsigned long currentTime) {
         default:
             if (confirma && !switch_alarme)
             {
-                previousMillis = currentTime;
                 alarmeDuracaoTemporario = alarmeDuracao;
                 local = layers[0];
             }
@@ -306,89 +289,8 @@ void handleInputs(unsigned long currentTime) {
             }
         }
     }
+    selecChanger();
 }
-
-class BlinkLCD
-{
-
-private:
-    byte m_blinkState, m_startPosition, m_dataLength;
-    unsigned long m_dataToBlink, m_previousMillis, m_blinkRate;
-    char m_text[16 + 1];
-
-public:
-    BlinkLCD() : m_blinkState(0), m_startPosition(0), m_dataLength(0),
-                 m_dataToBlink(0), m_previousMillis(0), m_blinkRate(500),
-                 m_text() {}
-
-    void Update()
-    {
-
-        unsigned long m_currentMillis = millis();
-
-        if (m_currentMillis - m_previousMillis >= m_blinkRate)
-        {
-
-            byte m_row = 0;
-            m_blinkState = !m_blinkState;
-            m_previousMillis = m_currentMillis;
-
-            if (m_startPosition > 15)
-            {
-                m_startPosition -= 16;
-                m_row = 1;
-            }
-
-            lcd.setCursor(m_startPosition, m_row);
-
-            if (m_blinkState)
-            {
-                if ((unsigned)strlen(m_text) > 0)
-                {
-                    lcd.print(m_text);
-                }
-                else
-                {
-                    lcd.print(m_dataToBlink);
-                }
-            }
-            else
-            {
-                for (byte i = 0; i < m_dataLength; i++)
-                {
-                    lcd.write(byte(0));
-                }
-            }
-        }
-    }
-
-    void SetBlinkRate(unsigned long blinkRate)
-    {
-        m_blinkRate = blinkRate;
-    }
-
-    void SetNumber(unsigned long dataToBlink)
-    {
-        m_dataToBlink = dataToBlink;
-    }
-
-    void SetLength(byte dataLength)
-    {
-        m_dataLength = dataLength;
-    }
-
-    // LCD top row, columns 0 - 15
-    // LCD Bottom row, 16 - 31
-    void SetStartPosition(byte startPosition)
-    {
-        m_startPosition = startPosition;
-    }
-
-    void SetText(char text[])
-    {
-        strcpy(m_text, text);
-    }
-};
 
 BlinkLCD TopRowLCD;
 BlinkLCD BottomRowLCD;
@@ -577,7 +479,86 @@ void renderUI() {
     }
 }
 
+class BlinkLCD
+{
 
+private:
+    byte m_blinkState, m_startPosition, m_dataLength;
+    unsigned long m_dataToBlink, m_previousMillis, m_blinkRate;
+    char m_text[16 + 1];
 
+public:
+    BlinkLCD() : m_blinkState(0), m_startPosition(0), m_dataLength(0),
+                 m_dataToBlink(0), m_previousMillis(0), m_blinkRate(500),
+                 m_text() {}
+
+    void Update()
+    {
+
+        unsigned long m_currentMillis = millis();
+
+        if (m_currentMillis - m_previousMillis >= m_blinkRate)
+        {
+
+            byte m_row = 0;
+            m_blinkState = !m_blinkState;
+            m_previousMillis = m_currentMillis;
+
+            if (m_startPosition > 15)
+            {
+                m_startPosition -= 16;
+                m_row = 1;
+            }
+
+            lcd.setCursor(m_startPosition, m_row);
+
+            if (m_blinkState)
+            {
+                if ((unsigned)strlen(m_text) > 0)
+                {
+                    lcd.print(m_text);
+                }
+                else
+                {
+                    lcd.print(m_dataToBlink);
+                }
+            }
+            else
+            {
+                for (byte i = 0; i < m_dataLength; i++)
+                {
+                    lcd.write(byte(0));
+                }
+            }
+        }
+    }
+
+    void SetBlinkRate(unsigned long blinkRate)
+    {
+        m_blinkRate = blinkRate;
+    }
+
+    void SetNumber(unsigned long dataToBlink)
+    {
+        m_dataToBlink = dataToBlink;
+    }
+
+    void SetLength(byte dataLength)
+    {
+        m_dataLength = dataLength;
+    }
+
+    // LCD top row, columns 0 - 15
+    // LCD Bottom row, 16 - 31
+    void SetStartPosition(byte startPosition)
+    {
+        m_startPosition = startPosition;
+    }
+
+    void SetText(char text[])
+    {
+        strcpy(m_text, text);
+    }
+};
 
 // Other helper functions for specific functionalities
