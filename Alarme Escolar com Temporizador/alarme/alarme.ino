@@ -11,8 +11,7 @@ void setup()
 {
     Serial.begin(9600);
     inicializarBotao();
-    inicializarLCD();
-    
+    inicializarLCD();    
 }
 
 void loop()

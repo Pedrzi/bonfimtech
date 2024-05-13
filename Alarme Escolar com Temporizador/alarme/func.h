@@ -14,6 +14,7 @@
 // Padrão = 90
 #define contraste_LCD 90
 #define ZERO 0x00
+#define BUTTONWAITTIME 200
 
 
 /*
@@ -40,5 +41,6 @@ byte ConverteparaDecimal(byte val);
 byte ConverteParaBCD(byte val);
 void Mostrarelogio();
 int getRTC(int values[]);
+void specialLayers(int layer);
 
 #endif

@@ -21,46 +21,21 @@ representa um índice diferente.
 */
 int layers[7][4] = {{1, 4, 1, 4}, {2, 3, 0, 0}, {99, 99, 99, 99}, {99, 99, 99, 99}, {5, 6, 0, 0}, {99, 99, 99, 99}, {99, 99, 99, 99}};
 char layersName[7][17] = 
-{"      menu      ", "     config     ", "   mudar hora   ", "  mudar duracao ",
-"  ver horarios  ", "horarios tarde", "horarios manha"};
+{"      Menu      ", "   Configurar   ", " Redefinir hora ", " Tempo de toque ",
+" Listar alarmes ", "      Tarde     ", "      Manha     "};
 
 int currentLayer = 0;
 
 int currentSelection = 0;
 int selectionIndex = 0;
 
-const int buttonWaitTime    = 200;
-
 struct boolPair;
 
 LiquidCrystal lcd(9, 8, 7, 6, 5, 4);
 
-uint64_t moverTimer = 0;
-uint64_t validarTimer = 0;
-// Checa se algum botão foi apertado e retorna esse valor
-boolPair checarBotoes()
-{
-    bool mov = false;
-    bool val = false;
-    if(millis64() - moverTimer > buttonWaitTime && !digitalRead(12))
-    {
-        moverTimer = millis64();
-        mov = true;
-    
-    }
 
-    if(millis64() - validarTimer > buttonWaitTime && !digitalRead(11))
-    {
-        validarTimer = millis64();
-        val = true;
-    }
-
-    return {val, mov};
-}
-
-
-void specialLayers()
-{
+void specialLayers(int layer)
+{   
     
 }
 
@@ -70,6 +45,11 @@ void handleLayers()
     boolPair botao = checarBotoes();
     bool val = botao.validar;
     bool mov = botao.mover;
+
+    if(currentSelection == 99)
+    {
+        specialLayers(currentLayer);
+    }
 
     if(val) currentLayer = currentSelection;
     if(mov) selectionIndex++;
@@ -90,36 +70,13 @@ void render()
     renderTimer = millis64();
 
     lcd.clear();
-
+    lcd.setCursor(0,0);
     if(currentLayer == 0)
     {
-        lcd.setCursor(0,0);
         Mostrarelogio();
     }
+    else lcd.print(layersName[currentLayer]); 
 
     lcd.setCursor(0,1);
     lcd.print(layersName[currentSelection]);
-}
-
-
-// Função que da print no painel lcd o horário atual
-void Mostrarelogio()
-{
-    int data[7];
-    getRTC(data);
-    // Imprime mensagem na primeira linha do display
-    // Mostra a hora atual no display
-    lcd.setCursor(4, 0);
-    if (data[2] < 10)
-    {lcd.print("0");}
-    lcd.print(data[2]);
-    lcd.print(":");
-    if (data[1] < 10)
-    {lcd.print("0");}
-    lcd.print(data[1]);
-    lcd.print(":");
-    if (data[0] < 10)
-    {lcd.print("0");}
-    lcd.print(data[0]);
-
 }

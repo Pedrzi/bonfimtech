@@ -5,6 +5,8 @@ const int8_t relay          = 10;
 const int8_t botaoValidar   = 11;
 const int8_t botaoMover     = 12;
 
+
+const int buttonWaitTime    = 200;
 extern LiquidCrystal lcd;
 
 // Váriável usada para criar um caractere especial de underline
@@ -87,4 +89,50 @@ int getRTC(int values[])
         }
     }
     
+}
+
+// Função que da print no painel lcd o horário atual
+void Mostrarelogio()
+{
+    int data[7];
+    getRTC(data);
+    // Imprime mensagem na primeira linha do display
+    // Mostra a hora atual no display
+    lcd.setCursor(4, 0);
+    if (data[2] < 10)
+    {lcd.print("0");}
+    lcd.print(data[2]);
+    lcd.print(":");
+    if (data[1] < 10)
+    {lcd.print("0");}
+    lcd.print(data[1]);
+    lcd.print(":");
+    if (data[0] < 10)
+    {lcd.print("0");}
+    lcd.print(data[0]);
+
+}
+
+
+uint64_t moverTimer = 0;
+uint64_t validarTimer = 0;
+// Checa e retorna se algum botão foi apertado.
+boolPair checarBotoes()
+{
+    bool mov = false;
+    bool val = false;
+    if(millis64() - moverTimer > BUTTONWAITTIME && !digitalRead(12))
+    {
+        moverTimer = millis64();
+        mov = true;
+    
+    }
+
+    if(millis64() - validarTimer > BUTTONWAITTIME && !digitalRead(11))
+    {
+        validarTimer = millis64();
+        val = true;
+    }
+
+    return {val, mov};
 }
