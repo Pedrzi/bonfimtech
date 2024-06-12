@@ -43,7 +43,7 @@ void inicializarBotao()
 // Função criada para incializar o relay
 void inicializarRelay()
 {
-    // pinMode(relay, OUTPUT);
+    pinMode(RELAY, OUTPUT);
     Serial.println("Relay iniciado");
 }
 

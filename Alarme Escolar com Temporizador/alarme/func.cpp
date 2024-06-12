@@ -49,16 +49,16 @@ void handleLayers()
     bool val = botao.validar;
     bool mov = botao.mover;
 
-    if (currentSelection == 99)
-    {
-        currentSelection = layers[currentLayer][0];
-        editor(val, mov, currentLayer);
-        return;
-    }
     if (currentSelection == 88)
     {
         currentSelection = layers[currentLayer][0];
         mostrarHorarios(val, mov, currentLayer);
+        return;
+    }
+    if (currentSelection == 99)
+    {
+        currentSelection = layers[currentLayer][0];
+        editor(val, mov, currentLayer);
         return;
     }
     if (currentSelection == 77)
@@ -93,7 +93,10 @@ void mostrarHorarios(bool vali, bool mov, int current)
         horarioSelect = 0;
 
     if (mov)
-        horarioSelect++;
+    {
+      if(!edit) horarioSelect++;
+    }
+        
 
     if (current == 5)
     {
@@ -134,8 +137,9 @@ void mostrarHorarios(bool vali, bool mov, int current)
             tempMinutosU = minU;
             tempHora = horarios[horarioSelect][0];
             vali = !vali;
+            edit = true;
         }
-        edit = true;
+        
 
         editor(vali, mov, currentLayer);
         return;
@@ -152,7 +156,7 @@ void mudarTempoDeToque(bool v, bool m)
         tempToque = 1;
     if (v)
     {
-        EEPROM.write(ENDERECODETOQUE, tempToque);
+        EEPROM.write(90, tempToque);
         resetFunc();
     }
     renderMudarDuracao();
@@ -162,7 +166,7 @@ int selection = 0;
 char tittle[17] = "";
 void editor(bool valid, bool move, int current)
 {
-    edit = false;
+    
     if (move)
         selection++;
     if (selection > 4)
