@@ -20,20 +20,20 @@ representa um índice diferente.
 6: Horários da tarde
 99: quantidade de opções dinâmicas
 */
-int layers[7][4] = {{1, 4, 1, 4}, {2, 3, 0, 0}, {99, 99, 99, 99}, {77, 77, 77, 77}, {5, 6, 0, 0}, {88, 88, 88, 88}, {88, 88, 88, 88}};
-char layersName[7][17] =
+int layers[8][4] = {{1, 4, 7, 4}, {2, 3, 0, 0}, {99, 99, 99, 99}, {77, 77, 77, 77}, {5, 6, 0, 0}, {88, 88, 88, 88}, {88, 88, 88, 88}, {66, 66, 66, 66}};
+char layersName[8][17] =
     {"      Menu      ", "   Configurar   ", " Redefinir hora ", " Tempo de toque ",
-     " Listar alarmes ", "     Manha     ", "     Tarde     "};
+     " Listar alarmes ", "     Manha     ", "     Tarde     ", "     Tocar     "};
 
 int currentLayer = 0;
 int currentSelection = 0;
 int selectionIndex = 0;
-int horarioSize = 32;
 extern int tempoToque;
 
 // Variável que contém todos os horários padrões do alarme
-int horarios[][2] = {
-    {7, 0}, {7, 50}, {8, 40}, {9, 30}, {9, 50}, {10, 40}, {11, 30}, {12, 10}, {13, 0}, {13, 40}, {14, 20}, {15, 0}, {15, 20}, {16, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+int horarios[HORARIOSIZE][2] = {
+    {7, 0}, {7, 50}, {8, 40}, {9, 30}, {9, 50}, {10, 40}, {11, 30}, {12, 10}, {13, 0}, {13, 40}, {14, 20}, {15, 0}, {15, 20}, {16, 0}
+    };
 
 struct boolPair;
 
@@ -52,22 +52,25 @@ void handleLayers()
     bool val = botao.validar;
     bool mov = botao.mover;
 
+    currentSelection = layers[currentLayer][selectionIndex];
     if (currentSelection == 88)
     {
-        currentSelection = layers[currentLayer][0];
         mostrarHorarios(val, mov, currentLayer);
         return;
     }
     if (currentSelection == 99)
     {
-        currentSelection = layers[currentLayer][0];
         editor(val, mov, currentLayer);
         return;
     }
     if (currentSelection == 77)
     {
-        currentSelection = layers[currentLayer][0];
         mudarTempoDeToque(val, mov);
+        return;
+    }
+    if (currentSelection == 66)
+    {
+        testarAlarme(val);
         return;
     }
     if (val)
@@ -79,7 +82,6 @@ void handleLayers()
         selectionIndex++;
     if (selectionIndex > 3)
         selectionIndex = 0;
-    currentSelection = layers[currentLayer][selectionIndex];
     if (selectionIndex == 3 && currentSelection == 0)
         selectionIndex = 0;
     renderMenu(layersName[currentLayer]);
@@ -92,21 +94,17 @@ bool edit = false;
 int horarioSelect = 0;
 void mostrarHorarios(bool vali, bool mov, int current)
 {
-    if (horarios[horarioSelect][0] == 0 && horarios[horarioSelect][1] == 0 && horarioSelect > 14)
-        horarioSelect = 0;
+    horarioSelect = horarioSelect > HORARIOSIZE ? 0 : horarioSelect;
 
-    if (mov)
+    if (mov && !edit)
     {
-      if(!edit) horarioSelect++;
+        horarioSelect++;
     }
         
     if (current == 5)
     {
 
-        if (horarioSelect > 8)
-        {
-            horarioSelect = 0;
-        }
+        horarioSelect = horarioSelect > 8 ? 0 : horarioSelect;
         if (horarioSelect == 8 && vali)
         {
             currentLayer = 4;
@@ -114,15 +112,9 @@ void mostrarHorarios(bool vali, bool mov, int current)
     }
     else
     {
-        if (horarioSelect < 8)
-        {
-            horarioSelect = 8;
-        }
-        if (horarioSelect > 14)
-        {
-            horarioSelect = 8;
-        }
-        if (horarioSelect == 14 && vali)
+        horarioSelect = horarioSelect < 8 ? 8 : horarioSelect;
+
+        if (horarioSelect == HORARIOSIZE && vali)
         {
             currentLayer = 4;
         }
@@ -153,12 +145,10 @@ int tempToque = EEPROM.read(ENDERECODETOQUE);
 void mudarTempoDeToque(bool v, bool m)
 {
     if (m)
-        tempToque++;
-    if (tempToque > 10)
-        tempToque = 1;
+        tempToque = (tempToque%LIMITETOQUE)+1;
     if (v)
     {
-        EEPROM.write(90, tempToque);
+        EEPROM.write(ENDERECODETOQUE, tempToque);
         resetFunc();
     }
     renderMudarDuracao();
@@ -169,9 +159,8 @@ char tittle[17] = "";
 void editor(bool valid, bool move, int current)
 {
     
-    if (move) {
+    if (move)
         selection = (selection + 1) % 5;
-    }
 
     if (valid) {
         if (selection == 0)
@@ -205,6 +194,21 @@ void editor(bool valid, bool move, int current)
     tempHora = tempHora > 24 ? 0 : tempHora;
     
     renderEditor();
+}
+
+void testarAlarme(bool v)
+{
+    digitalWrite(RELAY, HIGH);
+    lcd.setCursor(0,0);
+    lcd.print("     Parar    ");
+    lcd.setCursor(0,1);
+    lcd.print("                ");
+    if(v)
+    {
+        digitalWrite(RELAY, LOW);
+        currentLayer = 0;;
+    }
+    
 }
 
 uint64_t renderTimer = 0;

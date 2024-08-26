@@ -4,7 +4,7 @@
 #include <math.h>
 
 // Váriável usada para criar um caractere especial de underline
-const byte barra[8] = {
+byte barra[8] = {
     B11111,
     B00000,
     B00000,
@@ -15,8 +15,8 @@ const byte barra[8] = {
 };
 
 struct numArr;
+struct boolPair;
 
-extern int horarioSize;
 extern int horarios[][2];
 
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
@@ -102,7 +102,7 @@ void mostrarRelogio()
     // Imprime mensagem na primeira linha do display
     // Mostra a hora atual no display
     lcd.setCursor(4, 0);
-    for(int i = 2; i > 0; i--)
+    for(int i = 2; i > -1; i--)
     {
         if (data[i] < 10)
         {
@@ -111,6 +111,8 @@ void mostrarRelogio()
         lcd.print(data[i]);
         if(i!=0) lcd.print(":");
     }
+}
+
 
 uint64_t moverTimer = 0;
 uint64_t validarTimer = 0;
@@ -166,7 +168,7 @@ numArr dividirEmDois(int num)
 void SaveArrayToEEPROM()
 {
     int addr = 1;
-    for (int row = 0; row < horarioSize; row++)
+    for (int row = 0; row < HORARIOSIZE; row++)
     {
         for (int col = 0; col < 2; col++)
         {
@@ -179,7 +181,7 @@ void SaveArrayToEEPROM()
 void ReadArrayFromEEPROM()
 {
     int addr = 1;
-    for (int row = 0; row < horarioSize; row++)
+    for (int row = 0; row < HORARIOSIZE; row++)
     {
         for (int col = 0; col < 2; col++)
         {

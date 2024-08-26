@@ -14,6 +14,7 @@
 #define ZERO 0x00
 #define BUTTONWAITTIME 200
 #define ENDERECODETOQUE 90
+#define HORARIOSIZE 14
 
 void handleLayers();
 void renderMenu(char layerTitle[17]);
@@ -23,6 +24,6 @@ void mostrarHorarios(bool vali, bool mov, int current);
 void mudarTempoDeToque(bool v, bool m);
 void renderHorarios();
 void renderMudarDuracao();
-
+void testarAlarme(bool val);
 
 #endif

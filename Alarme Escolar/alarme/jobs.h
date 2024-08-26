@@ -3,10 +3,13 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>  
 
+#define BUTTONWAITTIME 200
+#define LIMITETOQUE 30
+// pins usados
+
 #define RELAY 10
 #define BOTAOVALIDAR 11
 #define BOTAOMOVER 12
-#define BUTTONWAITTIME 200
 #define LCD_RS 9
 #define LCD_ENABLE 8
 #define LCD_D4 7
