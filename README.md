@@ -1,5 +1,5 @@
 # Bonfimtech
-![Bonfimtech](.imgs/bonfimtech.jpg)
+![Bonfimtech](imgs/bonfimtech.jpg)
 
 Bem-vindo ao repositório oficial da **Bonfimtech**, a organização escolar dedicada a promover o uso de soluções tecnológicas na educação e fornecer uma plataforma para aprendizado de programação e modelagem 3D.
 
