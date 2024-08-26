@@ -1,3 +1,6 @@
+/*
+Funções da classe usada para piscar texto na tela do lcd
+*/
 #include "BlinkLCD.h"
 #include "jobs.h"
 

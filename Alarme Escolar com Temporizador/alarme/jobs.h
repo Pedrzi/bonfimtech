@@ -7,6 +7,13 @@
 #define BOTAOVALIDAR 11
 #define BOTAOMOVER 12
 #define BUTTONWAITTIME 200
+#define LCD_RS 9
+#define LCD_ENABLE 8
+#define LCD_D4 7
+#define LCD_D5 6
+#define LCD_D6 5
+#define LCD_D7 4
+#define LCD_VEE 3
 
 /*
 struct criado para retornar os valores dos botões com uma só chamada de função.
@@ -40,6 +47,9 @@ void ReadArrayFromEEPROM();
 byte ConverteparaDecimal(byte val);
 byte ConverteParaBCD(byte val);
 
+/* divide um número em sua dezena e uniadade
+eg. dividirEmDois(25) = numArr {2, 5}
+*/ 
 numArr dividirEmDois(int num);
 
 int getRTC(int values[]);

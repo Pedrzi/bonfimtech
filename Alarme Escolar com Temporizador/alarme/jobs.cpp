@@ -4,7 +4,7 @@
 #include <math.h>
 
 // Váriável usada para criar um caractere especial de underline
-byte barra[8] = {
+const byte barra[8] = {
     B11111,
     B00000,
     B00000,
@@ -19,7 +19,7 @@ struct numArr;
 extern int horarioSize;
 extern int horarios[][2];
 
-LiquidCrystal lcd(9, 8, 7, 6, 5, 4);
+LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 // converte a função millis do arduino para 64 bits
 // sem essa conversão em alguns dias de uso o alarme sofrerá com overflow
 uint64_t millis64()
@@ -50,7 +50,7 @@ void inicializarRelay()
 // Função criada para inicializar a tela lcd
 void inicializarLCD()
 {
-    analogWrite(3, contraste_LCD);
+    analogWrite(LCD_VEE, contraste_LCD);
     lcd.createChar(0, barra);
     lcd.begin(16, 2);
     lcd.setCursor(0, 0);
@@ -102,24 +102,15 @@ void mostrarRelogio()
     // Imprime mensagem na primeira linha do display
     // Mostra a hora atual no display
     lcd.setCursor(4, 0);
-    if (data[2] < 10)
+    for(int i = 2; i > 0; i--)
     {
-        lcd.print("0");
+        if (data[i] < 10)
+        {
+            lcd.print("0");
+        }
+        lcd.print(data[i]);
+        if(i!=0) lcd.print(":");
     }
-    lcd.print(data[2]);
-    lcd.print(":");
-    if (data[1] < 10)
-    {
-        lcd.print("0");
-    }
-    lcd.print(data[1]);
-    lcd.print(":");
-    if (data[0] < 10)
-    {
-        lcd.print("0");
-    }
-    lcd.print(data[0]);
-}
 
 uint64_t moverTimer = 0;
 uint64_t validarTimer = 0;

@@ -1,3 +1,6 @@
+/*
+Classe usada para fazer texto piscar na tela do lcd
+*/
 #ifndef BLINKLCD_H
 #define BLINKLCD_H
 

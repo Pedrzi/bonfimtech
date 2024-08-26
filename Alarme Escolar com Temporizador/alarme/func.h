@@ -14,7 +14,6 @@
 #define ZERO 0x00
 #define BUTTONWAITTIME 200
 #define ENDERECODETOQUE 90
-#define TEMPOTOQUE EEPROM.read(ENDERECODETOQUE)
 
 void handleLayers();
 void renderMenu(char layerTitle[17]);

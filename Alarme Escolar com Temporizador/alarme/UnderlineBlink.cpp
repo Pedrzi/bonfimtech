@@ -1,3 +1,7 @@
+/*
+Funções da classe usada para criar uma linha, que pisca, abaixo da seleção 
+*/
+
 #include "UnderlineBlink.h"
 #include "jobs.h"
 

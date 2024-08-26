@@ -1,3 +1,6 @@
+/*
+Classe usada para criar uma linha, que pisca, abaixo da seleção 
+*/
 #ifndef UnderlineBlink_H
 #define UnderlineBlink_H
 

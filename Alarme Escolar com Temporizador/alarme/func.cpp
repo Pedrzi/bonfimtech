@@ -31,16 +31,19 @@ int selectionIndex = 0;
 int horarioSize = 32;
 extern int tempoToque;
 
+// Variável que contém todos os horários padrões do alarme
 int horarios[][2] = {
     {7, 0}, {7, 50}, {8, 40}, {9, 30}, {9, 50}, {10, 40}, {11, 30}, {12, 10}, {13, 0}, {13, 40}, {14, 20}, {15, 0}, {15, 20}, {16, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
 
 struct boolPair;
 
+//declarado no arquivo jobs.cpp
 extern LiquidCrystal lcd;
 
 BlinkLCD BottomRowLCDtext;
 UnderlineBlink Underline;
 
+// Função usada para reiniciar o alarme 
 void (*resetFunc)(void) = 0;
 
 void handleLayers()
@@ -97,7 +100,6 @@ void mostrarHorarios(bool vali, bool mov, int current)
       if(!edit) horarioSelect++;
     }
         
-
     if (current == 5)
     {
 
@@ -147,7 +149,7 @@ void mostrarHorarios(bool vali, bool mov, int current)
     renderHorarios();
 }
 
-int tempToque = TEMPOTOQUE;
+int tempToque = EEPROM.read(ENDERECODETOQUE);
 void mudarTempoDeToque(bool v, bool m)
 {
     if (m)
@@ -167,42 +169,41 @@ char tittle[17] = "";
 void editor(bool valid, bool move, int current)
 {
     
-    if (move)
-        selection++;
-    if (selection > 4)
-        selection = 0;
-    if (selection == 0 && valid)
-        tempMinutosU++;
-    if (selection == 1 && valid)
-        tempMinutosD++;
-    if (selection == 2 && valid)
-        tempHora++;
-    if (tempMinutosD > 5)
-        tempMinutosD = 0;
-    if (tempMinutosU > 9)
-        tempMinutosU = 0;
-    if (tempHora > 24)
-        tempHora = 0;
-    if (selection == 3 && valid)
-    {
-        if (currentLayer == 2)
-        {
-            mudarHorario(tempMinutosD * 10 + tempMinutosU, tempHora);
-            resetFunc();
-        }
-        horarios[horarioSelect][0] = tempHora;
-        horarios[horarioSelect][1] = (tempMinutosD * 10 + tempMinutosU);
-        SaveArrayToEEPROM();
-        edit = false;
-        return;
-    }
-    if (selection == 4 && valid)
-    {
-        currentLayer = 0;
-        edit = false;
-        return;
+    if (move) {
+        selection = (selection + 1) % 5;
     }
 
+    if (valid) {
+        if (selection == 0)
+            tempMinutosU++;
+        else if (selection == 1)
+            tempMinutosD++;
+        else if (selection == 2)
+            tempHora++;
+        else if (selection == 3)
+        {
+            if (currentLayer == 2)
+            {
+                mudarHorario(tempMinutosD * 10 + tempMinutosU, tempHora);
+                resetFunc();
+            }
+            horarios[horarioSelect][0] = tempHora;
+            horarios[horarioSelect][1] = (tempMinutosD * 10 + tempMinutosU);
+            SaveArrayToEEPROM();
+            edit = false;
+            return;
+        }
+        else if (selection == 4)
+        {
+            currentLayer = 0;
+            edit = false;
+            return;
+        }
+    }
+    tempMinutosD = tempMinutosD > 5 ? 0 : tempMinutosD;
+    tempMinutosU = tempMinutosU > 9 ? 0 : tempMinutosU;
+    tempHora = tempHora > 24 ? 0 : tempHora;
+    
     renderEditor();
 }
 
