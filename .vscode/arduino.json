@@ -1,5 +1,0 @@
-{
-    "configuration": "cpu=atmega328",
-    "board": "arduino:avr:nano",
-    "sketch": "Alarme Escolar com Temporizador/alarme_novo/alarme_novo.ino"
-}
