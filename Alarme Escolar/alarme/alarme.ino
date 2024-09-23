@@ -61,9 +61,10 @@ void handleAlarm()
 		}
 		if (millis64() - alarmeTimer > tempoToque*1000)
 			tocarAlarme = false;
+		tocado = true;
 		if (millis64() - alarmeTimer > 120000)
 			tocado = false;
-		tocado = true;
+		
 	}
 	else digitalWrite(10, LOW);
 	}
