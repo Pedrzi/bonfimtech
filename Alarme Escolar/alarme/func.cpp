@@ -24,7 +24,8 @@ int layers[8][4] = {{1, 4, 7, 4}, {2, 3, 0, 0}, {99, 99, 99, 99}, {77, 77, 77, 7
 char layersName[8][17] =
     {"      Menu      ", "   Configurar   ", " Redefinir hora ", " Tempo de toque ",
      " Listar alarmes ", "     Manha     ", "     Tarde     ", "     Tocar     "};
-
+const char dias[7][4] = 
+    {"Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"};
 int currentLayer = 0;
 int currentSelection = 0;
 int selectionIndex = 0;
@@ -90,6 +91,7 @@ void handleLayers()
 int tempHora = 0;
 int tempMinutosU = 0;
 int tempMinutosD = 0;
+int tempDia = 0;
 bool edit = false;
 int horarioSelect = 0;
 void mostrarHorarios(bool vali, bool mov, int current)
@@ -160,7 +162,7 @@ void editor(bool valid, bool move, int current)
 {
     
     if (move)
-        selection = (selection + 1) % 5;
+        selection = (selection + 1) % 6;
 
     if (valid) {
         if (selection == 0)
@@ -171,9 +173,18 @@ void editor(bool valid, bool move, int current)
             tempHora++;
         else if (selection == 3)
         {
+            if (currentLayer != 2)
+            {
+              selection++;
+              return;
+            }
+            tempDia++;
+        }
+        else if (selection == 4)
+        {
             if (currentLayer == 2)
             {
-                mudarHorario(tempMinutosD * 10 + tempMinutosU, tempHora);
+                mudarHorario(tempMinutosD * 10 + tempMinutosU, tempHora, tempDia);
                 resetFunc();
             }
             horarios[horarioSelect][0] = tempHora;
@@ -182,16 +193,17 @@ void editor(bool valid, bool move, int current)
             edit = false;
             return;
         }
-        else if (selection == 4)
+        else if (selection == 5)
         {
             currentLayer = 0;
             edit = false;
             return;
         }
     }
+    tempDia = tempDia > 6 ? 0 : tempDia;
     tempMinutosD = tempMinutosD > 5 ? 0 : tempMinutosD;
     tempMinutosU = tempMinutosU > 9 ? 0 : tempMinutosU;
-    tempHora = tempHora > 24 ? 0 : tempHora;
+    tempHora = tempHora > 23 ? 0 : tempHora;
     
     renderEditor();
 }
@@ -276,10 +288,15 @@ void renderEditor()
         break;
     case 3:
         lcd.setCursor(0, 1);
-        BottomRowLCDtext.SetText("     salvar     ");
+        BottomRowLCDtext.SetText(dias[tempDia]);
         BottomRowLCDtext.Update();
         break;
     case 4:
+        lcd.setCursor(0, 1);
+        BottomRowLCDtext.SetText("     salvar     ");
+        BottomRowLCDtext.Update();
+        break;
+    case 5:
         lcd.setCursor(0, 1);
         BottomRowLCDtext.SetText("    cancelar    ");
         BottomRowLCDtext.Update();

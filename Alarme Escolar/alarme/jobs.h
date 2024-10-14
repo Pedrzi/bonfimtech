@@ -42,7 +42,7 @@ boolPair checarBotoes();
 void inicializarBotao();
 void inicializarRelay();
 void inicializarLCD();
-void mudarHorario(byte minutos, byte horas);
+void mudarHorario(byte minutos, byte horas, byte dia);
 void mostrarRelogio();
 void SaveArrayToEEPROM();
 void ReadArrayFromEEPROM();

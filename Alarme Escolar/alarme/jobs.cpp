@@ -18,6 +18,7 @@ struct numArr;
 struct boolPair;
 
 extern int horarios[][2];
+extern const char dias[7][4]
 
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 // converte a função millis do arduino para 64 bits
@@ -101,6 +102,8 @@ void mostrarRelogio()
     getRTC(data);
     // Imprime mensagem na primeira linha do display
     // Mostra a hora atual no display
+    lcd.setCursor(0,0);
+    lcd.print(dias[data[3]])
     lcd.setCursor(4, 0);
     for(int i = 2; i > -1; i--)
     {
@@ -136,7 +139,7 @@ boolPair checarBotoes()
     return {val, mov};
 }
 
-void mudarHorario(byte minutos, byte horas)
+void mudarHorario(byte minutos, byte horas, byte dia)
 {
     byte segundos = 30; // Valores de 0 a 59
     Wire.beginTransmission(DS1307_ADDRESS);
@@ -148,6 +151,7 @@ void mudarHorario(byte minutos, byte horas)
     Wire.write(ConverteParaBCD(segundos));
     Wire.write(ConverteParaBCD(minutos));
     Wire.write(ConverteParaBCD(horas));
+    Wire.write(ConverteParaBCD(dia));
     Wire.write(ZERO); // Start no CI
     Wire.endTransmission();
     Serial.println("Data alterada");

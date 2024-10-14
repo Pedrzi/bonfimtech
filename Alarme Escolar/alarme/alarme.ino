@@ -26,7 +26,7 @@ void loop()
     handleLayers();
     Checarhora();
     handleAlarm();
-    
+    delay(10);
 }
 
 bool tocado = false;
