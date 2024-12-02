@@ -1,0 +1,125 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/pdrzi/Documents/GabaritoCorretor/GabaritoCorretor.csproj": {}
+  },
+  "projects": {
+    "/home/pdrzi/Documents/GabaritoCorretor/GabaritoCorretor.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/pdrzi/Documents/GabaritoCorretor/GabaritoCorretor.csproj",
+        "projectName": "GabaritoCorretor",
+        "projectPath": "/home/pdrzi/Documents/GabaritoCorretor/GabaritoCorretor.csproj",
+        "packagesPath": "/home/pdrzi/.nuget/packages/",
+        "outputPath": "/home/pdrzi/Documents/GabaritoCorretor/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/pdrzi/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/lib64/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Avalonia": {
+              "target": "Package",
+              "version": "[11.2.1, )"
+            },
+            "Avalonia.Desktop": {
+              "target": "Package",
+              "version": "[11.2.1, )"
+            },
+            "Avalonia.Diagnostics": {
+              "include": "None",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[11.2.1, )"
+            },
+            "Avalonia.Fonts.Inter": {
+              "target": "Package",
+              "version": "[11.2.1, )"
+            },
+            "Avalonia.Themes.Fluent": {
+              "target": "Package",
+              "version": "[11.2.1, )"
+            },
+            "CommunityToolkit.Mvvm": {
+              "target": "Package",
+              "version": "[8.2.1, )"
+            },
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0-rc.2.24473.5, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+              "version": "[9.0.0-rc.2.24474.3, 9.0.0-rc.2.24474.3]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Crossgen2.linux-x64",
+              "version": "[9.0.0-rc.2.24473.5, 9.0.0-rc.2.24473.5]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[9.0.0-rc.2.24473.5, 9.0.0-rc.2.24473.5]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.win-x64",
+              "version": "[9.0.0-rc.2.24473.5, 9.0.0-rc.2.24473.5]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/9.0.100-rc.2.24474.1/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
+      }
+    }
+  }
+}

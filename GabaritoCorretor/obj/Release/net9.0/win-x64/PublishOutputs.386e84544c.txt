@@ -1,0 +1,5 @@
+/home/pdrzi/Programming/Projects/GabaritoCorretor/win/GabaritoCorretor.pdb
+/home/pdrzi/Programming/Projects/GabaritoCorretor/win/av_libglesv2.dll
+/home/pdrzi/Programming/Projects/GabaritoCorretor/win/libHarfBuzzSharp.dll
+/home/pdrzi/Programming/Projects/GabaritoCorretor/win/libSkiaSharp.dll
+/home/pdrzi/Programming/Projects/GabaritoCorretor/win/GabaritoCorretor.exe

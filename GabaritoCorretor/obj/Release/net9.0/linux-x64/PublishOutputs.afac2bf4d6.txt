@@ -1,0 +1,4 @@
+/home/pdrzi/Programming/Projects/GabaritoCorretor/GabaritoCorretor.pdb
+/home/pdrzi/Programming/Projects/GabaritoCorretor/libHarfBuzzSharp.so
+/home/pdrzi/Programming/Projects/GabaritoCorretor/libSkiaSharp.so
+/home/pdrzi/Programming/Projects/GabaritoCorretor/GabaritoCorretor
